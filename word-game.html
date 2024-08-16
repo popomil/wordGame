@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+<style>
+    *{
+        box-sizing: border-box;
+    }
+    :root{
+        --primary-color: #f44336;
+    }
+    body{
+        margin: 0;
+        background-color: #EEE;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    h1{
+        text-align: center;
+        padding: 20px;
+        margin: 0 0 50px;
+        background-color: white;
+    }
+    .guess-game{
+        text-align: center;
+        width: 1000px;
+        margin: 20px auto;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        .game-area{
+            .inputs{
+                > div{
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    span{
+                        font-size: 30px;
+                        margin-right: 15px;
+                        font-weight: bold;
+                    }
+                }
+                .disabled-inputs{
+                    opacity: 0.5;
+                    pointer-events: none;
+
+                }
+                input {
+                    margin: 0 5px;
+                    width: 60px;
+                    height: 60px;
+                    text-align: center;
+                    font-size: 50px;
+                    background: white;
+                    caret-color: var(--primary-color);
+                    border: none;
+                    border-bottom: 3px solid #333;
+                    &:focus{
+                        outline-color: #ccc;
+                    }
+                    &.yes-in-place{
+                        background-color: #f89e13;
+                        border: #f89e13;
+                        color: white;
+                    }
+                    &.not-in-place{
+                        background-color: #18ba89;
+                        border: #18ba89;
+                        color: white;
+                    }
+                    &.no{
+                        background-color: #27303f;
+                        border: #27303f;
+                        color: white;
+                    }
+
+                }
+            }
+        .control{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 500px;
+            margin: 30px auto;
+            gap: 10px;
+            .check{
+                background-color: var(--primary-color);
+                flex: 1;
+            }
+            .hint{
+                background-color: #009688;
+                width: fit-content;
+
+    }
+        button:disabled{
+            background-color: black;
+            opacity: 0.4;
+            cursor: no-drop;
+    }
+     button{
+        border: none;
+        font-size: 25px;
+        padding: 15px 20px;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+
+  }
+    }
+     }
+        .key-colors{
+            .key-color{
+                display: flex;
+                align-items: center;
+                padding: 15px;
+                background-color: white;
+                margin-bottom: 10px;
+                .key{
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    margin-right: 10px;
+                    &.in-place{
+                        background-color: #f89e13;
+                    }
+                    &.not-in-place{
+                        background-color: #18ba89;
+                    }
+                    &.no{
+                        background-color: #27303f;
+                    }
+                    .key-text{
+                        font-size: 20px;
+                        font-weight: bold;
+                    }
+                }
+
+
+            }
+        }
+
+    }
+    footer{
+        text-align: center;
+        padding: 20px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        color: white;
+    }
+    .message{
+        text-align: center;
+        font-weight: bold;
+        font-size: 30px;
+        span{
+            font-weight: bold;
+            display: block;
+            font-size: 50px;
+            color: var(--primary-color);
+            text-transform: capitalize;
+            margin-top: 10px;
+
+        }
+        p{
+            margin-top: 15px;
+        }
+    }
+</style>
+</head>
+<body>
+    <h1></h1>
+    <div class="guess-game">
+        <div class="game-area">
+            <div class="inputs"></div>
+            <div class="control">
+                <button class="check">Check Word </button>
+                <button class="hint"><span></span> Hints</button>
+            </div>
+            <div class="message"></div>
+        </div>
+        <div class="key-colors">
+            <h2>Key colors</h2>
+            <div class="key-color">
+                <div class="key in-place"></div>
+                <div class="key-text">Letter Is Correct and In place</div>
+            </div>
+            <div class="key-color">
+                <div class="key not-in-place"></div>
+                <div class="key-text">Letter Is Correct But Not In place</div>
+            </div>
+            <div class="key-color">
+                <div class="key no"></div>
+                <div class="key-text">Letter Is wrong</div>
+            </div>
+        </div>
+
+    </div>
+    <footer></footer>
+</body>
+<script>
+    // setting Game Name
+    let gamename = "Guess The Word";
+    document.title = gamename
+    document.querySelector("h1").innerHTML = gamename 
+    document.querySelector("footer").innerHTML = `${gamename} Game Created By Abanoub `
+    // setting game options
+    let numbersOfTries = 7;
+    let numberOfLetters = 6;
+    let currentTry = 1;
+    let numberOfHints = 2;
+
+
+    // Mange words
+    let wordToGuess = "";
+    const words = ["Create","Update","Delete","Master","Branch","Mainly","Abanoub","School"]
+    wordToGuess = words[Math.floor(Math.random() * words.length)].toLowerCase();
+    let messageArea = document.querySelector(".message")
+
+    // Manage Hints
+    document.querySelector(".hint span").innerHTML =  numberOfHints
+    const getHintButton = document.querySelector(".hint")
+    getHintButton.addEventListener("click", getHint)
+
+
+    function generateInput(){
+        const inputsContainer = document.querySelector(".inputs");
+
+            
+        // create main try Div
+for(let i = 1; i <= numbersOfTries; i++){
+    const tryDiv = document.createElement("div")
+    tryDiv.classList.add(`try-${i}`);
+    tryDiv.innerHTML = `<span>Try ${i}</span>`;
+
+    if(i !== 1) tryDiv.classList.add("disabled-inputs");
+            // Create inputs
+    for(let j = 1; j <= numberOfLetters; j++){
+        const input = document.createElement("input")
+        input.type = "text"
+        input.id = `guess-${i}-letter-${j}`
+        input.setAttribute("maxlength", "1");
+            tryDiv.appendChild(input)
+
+        }
+
+        inputsContainer.appendChild(tryDiv)
+}
+    // focus on first input in first try Element
+    inputsContainer.children[0].children[1].focus()
+
+    // Disable  all inputs Except First one
+    const inputsInDisabledDiv = document.querySelectorAll(".disabled-inputs input")
+    inputsInDisabledDiv.forEach((input) => (input.disabled = true))
+    //  Converts Inputs To Upercase
+    const inputs = document.querySelectorAll("input")
+    inputs.forEach((input,index) =>{
+        input.addEventListener("input", function(){
+            this.value = this.value.toUpperCase();
+            const nextInput = inputs[index + 1]
+            if(nextInput) nextInput.focus();
+        });
+        input.addEventListener("keydown",function (event){
+            const currentIndex = Array.from(inputs).indexOf(event.target);
+            if(event.key === "ArrowRight"){
+            const nextInput = currentIndex + 1;
+            if(nextInput < inputs.length) inputs[nextInput].focus()
+         }
+         if(event.key === "ArrowLeft"){
+            const prevInput = currentIndex - 1;
+            if(prevInput >= 0 ) inputs[prevInput].focus()
+         }
+       })
+    });
+    
+    }
+    const guessBoutton = document.querySelector(".check") 
+    guessBoutton.addEventListener("click", handleGuesses);
+    console.log(wordToGuess)
+
+    function handleGuesses(){
+        let successGuess = true;
+        for(let i = 1; i <= numberOfLetters; i++){
+            const inputField = document.querySelector(`#guess-${currentTry}-letter-${i}`)
+            const letter = inputField.value.toLowerCase();
+            const actualLetter = wordToGuess[i - 1]
+            //  Game Logic
+            if(letter === actualLetter){
+                inputField.classList.add("yes-in-place")
+            }else if(wordToGuess.includes(letter) && letter !== ""){
+                inputField.classList.add("not-in-place")
+                successGuess = false;
+            }else{
+                inputField.classList.add("no")
+                successGuess = false;
+            }
+
+        }
+        //  Ceck if user win or lose
+        if(successGuess){
+            messageArea.innerHTML = `You Win The Word Is <span>${wordToGuess}</span>`
+            if(numberOfHints === 2){
+                messageArea.innerHTML = `<p>Congratz You Didn't Use Hints</p> `
+
+            }
+            //Add  Disabled
+            let allTries = document.querySelectorAll(".inputs > div")
+            allTries.forEach((tryDiv) => tryDiv.classList.add("disabled-inputs"))
+            // Disabled All Input
+            guessBoutton.disabled = true;
+            getHintButton.disabled = true;
+
+
+        }else{
+            document.querySelector(`.try-${currentTry}`).classList.add("disabled-inputs");
+            const currentTryInputs =  document.querySelectorAll(`.try-${currentTry} input`)
+            currentTryInputs.forEach((input) => (input.disabled = true))
+            currentTry++;
+
+            
+            const nextTryInput = document.querySelectorAll(`.try-${currentTry} input`);
+            nextTryInput.forEach((input) => (input.disabled = false))
+
+            let el = document.querySelector(`.try-${currentTry}`)
+            if(el){
+                document.querySelector(`.try-${currentTry}`).classList.remove("disabled-inputs");
+                el.children[1].focus();
+            }else{
+                guessBoutton.disabled = true;
+                getHintButton.disabled = true;
+                messageArea.innerHTML = `You lose The Word Is <span>${wordToGuess}</span> `
+            }
+        }
+    }
+    function getHint(){
+        if(numberOfHints > 0){
+            numberOfHints--;
+            document.querySelector(".hint span").innerHTML =  numberOfHints
+        }
+        if(numberOfHints === 0){
+            getHintButton.disabled = true;
+
+        }
+        const enabledInputs = document.querySelectorAll("input:not([disabled])");
+        const emptyEnabledInputs = Array.from(enabledInputs).filter((input) => input.value === "");
+        if(emptyEnabledInputs.length > 0){
+            const randomIndex = Math.floor(Math.random() * emptyEnabledInputs.length)
+            const randomInput = emptyEnabledInputs[randomIndex];
+            const indexToFill = Array.from(enabledInputs).indexOf(randomInput);
+            if(indexToFill !== -1){
+                randomInput.value = wordToGuess[indexToFill].toUpperCase();
+            }
+
+        }
+
+    }
+
+    function handleBackSpace(event){
+        if(event.key === "Backspace"){
+            const inputs = document.querySelectorAll("input:not([disabled])")
+            const currentIndex = Array.from(inputs).indexOf(document.activeElement);
+            if(currentIndex > 0){
+                const currentInput = inputs[currentIndex];
+                const prevInput = inputs[currentIndex - 1];
+                currentInput.value = "";
+                prevInput.value = "";
+                prevInput.focus();
+
+            }
+        }
+
+    }
+    document.addEventListener("keydown", handleBackSpace)
+
+
+    window.onload = function(){
+        generateInput()
+    }
+
+
+
+
+</script>
+</html>
